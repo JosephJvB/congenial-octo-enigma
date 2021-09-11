@@ -90,6 +90,7 @@ button {
   margin: 10px auto;
   border: solid 1px gray;
   border-radius: 12px;
+  background-color: #fff;
 }
 .twitter-tweet {
   margin: 0 !important;

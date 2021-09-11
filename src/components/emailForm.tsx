@@ -6,8 +6,7 @@ import "../styles/main.css"
 const lambdaUrl = ""
 
 interface sendData {
-  to: string
-  from: string
+  email: string
   sendAt: number
   subject: string
   bodyText: string
@@ -27,16 +26,14 @@ interface emailFormProps {
 }
 
 const EmailForm = (props: emailFormProps) => {
-  const [toEmail, setToEmail] = useState("")
-  const [fromEmail, setFromEmail] = useState("")
+  const [email, setEmail] = useState("")
   const [sendAt, setSendAt] = useState("")
   const [subject, setSubject] = useState("")
   const [bodyText, setBodyText] = useState("")
 
   function handleSend(): Promise<any> {
     return postData({
-      to: toEmail,
-      from: fromEmail,
+      email,
       sendAt: new Date(sendAt).getTime(),
       subject,
       bodyText
@@ -50,17 +47,13 @@ const EmailForm = (props: emailFormProps) => {
         <form onSubmit={e => e.preventDefault()}>
           <div className="row" style={{justifyContent:'space-between'}}>
             <div className="formElement w50">
-              <label htmlFor="senderEmail">sender email address</label>
-              <input type="email" name="senderEmail" onChange={e => setFromEmail(e.target.value)} />
+              <label htmlFor="Email">email address</label>
+              <input type="email" name="Email" onChange={e => setEmail(e.target.value)} />
             </div>
             <div className="formElement">
               <label htmlFor="sendAtDate">email arrive date</label>
               <input type="date" name="sendAtDate" onChange={e => setSendAt(e.target.value)} />
             </div>
-          </div>
-          <div className="formElement w50">
-            <label htmlFor="recipientEmail">recipient email address</label>
-            <input type="email" name="recipientEmail" onChange={e => setToEmail(e.target.value)} />
           </div>
           <div className="formElement w50">
             <label htmlFor="subject">subject</label>
