@@ -1,0 +1,116 @@
+@import url("./fonts.css");
+
+*,html,body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background-color: #fdf0e6;
+}
+header {
+  padding: 3vw 4vw;
+}
+.row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+.w50 {
+  width: 50%;
+}
+.w75 {
+  width: 75%;
+}
+.textCenter {
+  text-align: center;
+}
+.headerFont {
+  font-family: brandon-grotesque;
+  letter-spacing: .05em;
+  text-transform: none;
+  line-height: 1.4em;
+  font-size: calc((2 - 1) * 1.2vh + 1rem);
+}
+.textWhite {
+  color: #fff;
+}
+.textOrange {
+  color: #f08e80;
+}
+.bodyFont {
+  font-family: adobe-caslon-pro;
+  letter-spacing: 0em;
+  text-transform: none;
+  line-height: 1.8em;
+}
+p,label {
+  font-family: adobe-caslon-pro;
+  letter-spacing: 0em;
+  text-transform: none;
+  line-height: 1.8em;
+  color: rgb(104, 104, 104);
+}
+.formElement {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.orangeButton {
+  margin: 0 auto;
+  background-color: #f08e80;
+  color: #fff;
+  border: solid 1px #f08e80;
+}
+.orangeButton:hover {
+  background-color: #fdf0e6;
+  color: #f08e80;
+}
+.composeButton {
+  margin-top: 20px;
+  box-shadow: #c1c1c1 6px 6px;
+}
+.composeButton:hover {
+  background-color: #fff;
+}
+.sendButton:hover {
+  background-color: #fdf0e6;
+  /* box-shadow: #c1c1c1 6px 6px; */
+}
+.tweetContainer {
+  width: 550px;
+  height: 225px;
+  margin: 10px auto;
+  border: solid 1px gray;
+  border-radius: 12px;
+}
+.twitter-tweet {
+  margin: 0 !important;
+}
+.modalBackground {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  z-index: 5;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+.modalContainer {
+  z-index: 10;
+  position:absolute;
+  top: 112px;
+  transform: translateX(-50%);
+  left: 50%;
+  border-radius: 12px;
+  background-color: #fff;
+  width: 550px;
+  padding: 20px;
+  box-shadow: 0px 0px 15px -5px rgba(74, 74, 74, 0.75);
+}
