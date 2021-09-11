@@ -31,13 +31,18 @@ const EmailForm = (props: emailFormProps) => {
   const [subject, setSubject] = useState("")
   const [bodyText, setBodyText] = useState("")
 
-  function handleSend(): Promise<any> {
-    return postData({
-      email,
-      sendAt: new Date(sendAt).getTime(),
-      subject,
-      bodyText
-    })
+  async function handleSend(): Promise<any> {
+    try {
+      await postData({
+        email,
+        sendAt: new Date(sendAt).getTime(),
+        subject,
+        bodyText
+      })
+    } catch (e) {
+      console.error(e)
+    }
+    props.closeModal()
   }
   return (
     <>
