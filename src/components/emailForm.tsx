@@ -3,7 +3,7 @@ import { useState } from "react"
 import axios from "axios"
 import "../styles/main.css"
 
-const lambdaUrl = ""
+const lambdaUrl = "https://toirpbw29h.execute-api.ap-southeast-2.amazonaws.com/v1/email"
 
 interface sendData {
   email: string
