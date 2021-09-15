@@ -6,6 +6,7 @@ import "../styles/main.css"
 const lambdaUrl = "https://toirpbw29h.execute-api.ap-southeast-2.amazonaws.com/v1/email"
 
 interface sendData {
+  templateId: string
   email: string
   sendAt: number
   subject: string
@@ -34,18 +35,13 @@ const EmailForm = (props: emailFormProps) => {
 
   async function handleSend(): Promise<any> {
     try {
-      console.log({
+      await postData({
+        templateId: 'd-c9fb10c0dd984cd49da8e209cd032b94',
         email,
-        sendDate,
-        sendTime,
+        sendAt: new Date(sendDate || 0).getTime(),
         subject,
+        bodyText
       })
-      // await postData({
-      //   email,
-      //   sendAt: new Date(sendAt).getTime(),
-      //   subject,
-      //   bodyText
-      // })
     } catch (e) {
       console.error(e)
     }
