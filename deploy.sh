@@ -11,5 +11,6 @@ aws s3 cp ~/WORKSPACE/joe/future.hellolennie/frontend/public/ \
 s3://lennie-private-test/ --recursive \
 --profile joe
 aws cloudfront create-invalidation \
-distribution-id EPRLI4PQUKWBM \
---paths /*
+--distribution-id EPRLI4PQUKWBM \
+--paths "/*" \
+--profile joe
