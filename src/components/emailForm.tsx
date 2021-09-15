@@ -27,18 +27,25 @@ interface emailFormProps {
 
 const EmailForm = (props: emailFormProps) => {
   const [email, setEmail] = useState("")
-  const [sendAt, setSendAt] = useState("")
+  const [sendDate, setSendDate] = useState("")
+  const [sendTime, setSendTime] = useState("")
   const [subject, setSubject] = useState("")
   const [bodyText, setBodyText] = useState("")
 
   async function handleSend(): Promise<any> {
     try {
-      await postData({
+      console.log({
         email,
-        sendAt: new Date(sendAt).getTime(),
+        sendDate,
+        sendTime,
         subject,
-        bodyText
       })
+      // await postData({
+      //   email,
+      //   sendAt: new Date(sendAt).getTime(),
+      //   subject,
+      //   bodyText
+      // })
     } catch (e) {
       console.error(e)
     }
@@ -57,8 +64,17 @@ const EmailForm = (props: emailFormProps) => {
             </div>
             <div className="formElement">
               <label htmlFor="sendAtDate">email arrive date</label>
-              <input type="date" name="sendAtDate" onChange={e => setSendAt(e.target.value)} />
+              <input name="sendAtDate" type="date"
+                onChange={e => setSendDate(e.target.value)} />
             </div>
+            {/* firefox time picker is rubbish, find another solution!
+            <div className="formElement">
+              <label htmlFor="sendAtTime">email arrive time</label>
+              <input name="sendAtTime" type="time"
+                onChange={e => console.log('time change', e.target.value)}
+                onInput={e => console.log('time change', e.target)}
+                />
+            </div> */}
           </div>
           <div className="formElement w50">
             <label htmlFor="subject">subject</label>

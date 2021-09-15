@@ -86,7 +86,7 @@ button {
 }
 .tweetContainer {
   width: 550px;
-  height: 225px;
+  min-height: 273px;
   margin: 10px auto;
   border: solid 1px gray;
   border-radius: 12px;
