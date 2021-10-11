@@ -82,8 +82,8 @@ const Template = () => {
     setPendingPlaceholder(pendingParams)
   }
 
-  const placeholderMouseDown = (e: React.MouseEvent) => {
-    if (!canvasRef.current || !(e.target instanceof HTMLElement)) {
+  const placeholderMouseDown = (e: React.MouseEvent, i: number) => {
+    if (!canvasRef.current) {
       return
     }
     e.stopPropagation()
@@ -94,13 +94,12 @@ const Template = () => {
       y: e.clientY - canvasRef.current.offsetTop,
     }
     setDragStart(coords)
-    const index = Number(e.target?.dataset.idx)
-    if (placeholders[index]) {
-      setFocusedIndex(index)
+    if (placeholders[i]) {
+      setFocusedIndex(i)
     }
     console.log('placeholderMouseDown')
   }
-  const placeholderMouseUp = (e: React.MouseEvent) => {
+  const placeholderMouseUp = (e: React.MouseEvent, i: number) => {
     console.log('placeholderMouseUp')
     setMouseDown(false)
     setFocusedIndex(null)
@@ -132,9 +131,9 @@ const Template = () => {
         }
         return (
           // need to add nodes for drag/transform
-          <div data-idx={i} className={pClass} style={pStyle} key={i}
-            onMouseDown={e => placeholderMouseDown(e)}
-            onMouseUp={e => placeholderMouseUp(e)}>
+          <div className={pClass} style={pStyle} key={i}
+            onMouseDown={e => placeholderMouseDown(e, i)}
+            onMouseUp={e => placeholderMouseUp(e, i)}>
             <span>x: {p.left}</span>
             <span>y: {p.top}</span>
             <span>h: {p.h}</span>
