@@ -118,6 +118,10 @@ button {
   padding: 20px;
   box-shadow: 0px 0px 15px -5px rgba(74, 74, 74, 0.75);
 }
+.toolbarContainer {
+  width: 800px;
+  margin: 0 auto;
+}
 .templateContainer {
   width: 800px;
   height: 1200px;
@@ -148,4 +152,47 @@ button {
   position: absolute;
   display: flex;
   flex-direction: column;
+}
+.debugWrapper {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+.transformWrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+.transformNode {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 20px;
+  color: white;
+  border: 1px solid black;
+}
+.transformNode.topLeft {
+  cursor: nw-resize;
+}
+.transformNode.topMid {
+  cursor: n-resize;
+}
+.transformNode.topRight {
+  cursor: ne-resize;
+}
+.transformNode.midRight {
+  cursor: e-resize;
+}
+.transformNode.botRight {
+  cursor: se-resize;
+}
+.transformNode.botMid {
+  cursor: s-resize;
+}
+.transformNode.botLeft {
+  cursor: sw-resize;
+}
+.transformNode.midLeft {
+  cursor: w-resize;
 }

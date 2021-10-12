@@ -1,109 +1,13 @@
 import * as React from "react"
-import { useRef, useState } from "react"
+import { useState } from "react"
+import TemplateComponent from "../components/template"
 import "../styles/main.css"
+import { Template, ToolbarStates } from "../types"
 
-import { Coords, Placeholder, PlaceholderTypes, ToolbarStates } from "../types"
 
-const Template = () => {
+const Studio = () => {
   const [toolbarState, setToolbarState] = useState<ToolbarStates>('')
-  const canvasStyle = {
-    cursor: toolbarState == '' ? 'default' : 'crosshair',
-    margin: '0 auto',
-  }
-  const [dragStart, setDragStart] = useState<Coords>({ x: 0, y: 0 })
-  const [mouseDown, setMouseDown] = useState(false)
-  const [pendingPlaceholder, setPendingPlaceholder] = useState<Placeholder | null>(null)
-  const [placeholders, setPlaceholders] = useState<Placeholder[]>([])
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
-  const canvasRef = useRef<HTMLDivElement>(null)
-
-  const canvasMouseDown = (e: React.MouseEvent) => {
-    if (toolbarState == '' || !canvasRef.current) {
-      return
-    }
-    setMouseDown(true)
-    const coords: Coords = {
-      x: e.clientX - canvasRef.current.offsetLeft,
-      y: e.clientY - canvasRef.current.offsetTop,
-    }
-    console.log('canvasMouseDown', coords)
-    setDragStart(coords)
-  }
-  const canvasMouseUp = (e: React.MouseEvent) => {
-    if (!canvasRef.current) {
-      return
-    }
-    setMouseDown(false)
-    // setToolbarState('')
-    if (pendingPlaceholder) {
-      setPlaceholders([...placeholders, pendingPlaceholder])
-      setPendingPlaceholder(null)
-    }
-  }
-  const canvasMouseMove = (e: React.MouseEvent) => {
-    if (!mouseDown || !canvasRef.current) {
-      return
-    }
-
-    // console.log('canvasMouseMove')
-    const coords: Coords = {
-      x: e.clientX - canvasRef.current.offsetLeft,
-      y: e.clientY - canvasRef.current.offsetTop,
-    }
-    console.log('canvasMouseMove', coords)
-    if (toolbarState == '' && focusedIndex != null) {
-      const copy = [...placeholders]
-      copy[focusedIndex].left += coords.x - dragStart.x
-      copy[focusedIndex].top += coords.y - dragStart.y
-      setPlaceholders(copy)
-      setDragStart(coords)
-      return
-    }
-
-    const pendingParams: Placeholder = {
-      type: toolbarState as PlaceholderTypes,
-      left: dragStart.x,
-      top: dragStart.y,
-      w: coords.x - dragStart.x,
-      h: coords.y - dragStart.y,
-    }
-    if (pendingParams.w < 0) {
-      pendingParams.w = Math.abs(pendingParams.w)
-      pendingParams.left = dragStart.x - pendingParams.w
-    }
-    if (pendingParams.h < 0) {
-      pendingParams.h = Math.abs(pendingParams.h)
-      pendingParams.top = dragStart.y - pendingParams.h
-    }
-    // console.log('canvasMouseMove', pendingParams)
-    if (pendingParams.w < 10 && pendingParams.h < 10) {
-      return
-    }
-    setPendingPlaceholder(pendingParams)
-  }
-
-  const placeholderMouseDown = (e: React.MouseEvent, i: number) => {
-    if (!canvasRef.current) {
-      return
-    }
-    e.stopPropagation()
-    setMouseDown(true)
-    setToolbarState('')
-    const coords: Coords = {
-      x: e.clientX - canvasRef.current.offsetLeft,
-      y: e.clientY - canvasRef.current.offsetTop,
-    }
-    setDragStart(coords)
-    if (placeholders[i]) {
-      setFocusedIndex(i)
-    }
-    console.log('placeholderMouseDown')
-  }
-  const placeholderMouseUp = (e: React.MouseEvent, i: number) => {
-    console.log('placeholderMouseUp')
-    setMouseDown(false)
-    setFocusedIndex(null)
-  }
+  const [activeTemplate, setActiveTemplate] = useState<Template>({ placeholders: [] })
 
   const updateToolbarState = (t: ToolbarStates) => {
     console.log('updateToolbarState', t)
@@ -113,50 +17,23 @@ const Template = () => {
       setToolbarState(t)
     }
   }
-
-  const renderPlaceholders = () => {
-    const copy = [...placeholders]
-    if (pendingPlaceholder) {
-      copy.push(pendingPlaceholder)
-    }
-    return (
-      copy.map((p: Placeholder, i: number) => {
-        const pClass = `placeholder ${p.type}Placeholder`
-        const pStyle = {
-          width: p.w + 'px',
-          height: p.h + 'px',
-          top: p.top + 'px',
-          left: p.left + 'px',
-          zIndex: 10 + i,
-        }
-        return (
-          // need to add nodes for drag/transform
-          <div className={pClass} style={pStyle} key={i}
-            onMouseDown={e => placeholderMouseDown(e, i)}
-            onMouseUp={e => placeholderMouseUp(e, i)}>
-            <span>x: {p.left}</span>
-            <span>y: {p.top}</span>
-            <span>h: {p.h}</span>
-            <span>w: {p.w}</span>
-          </div>
-        )
-      })
-    )
+  const updateTemplateState = (t: Template) => {
+    setActiveTemplate(t)
   }
 
   return (
-    <main>
+    <main className="">
       <header>
         <h1 className="headerFont textCenter textOrange">email design studio</h1>
       </header>
-      <div className="templateContainer">
+      <div className="toolbarContainer">
         <div className="toolbar">
           <button
             onClick={() => {
-              setPendingPlaceholder(null)
-              setPlaceholders([])
-              setFocusedIndex(null)
-              setMouseDown(false)
+              // setPendingPlaceholder(null)
+              // setPlaceholders([])
+              // setFocusedIndex(null)
+              // setMouseDown(false)
             }}
             className="clearIcon">C</button>
           <button
@@ -172,17 +49,13 @@ const Template = () => {
             onClick={() => updateToolbarState('image')}
             className="addImageIcon">Img</button>
         </div>
-        <div className="templateCanvas"
-          style={canvasStyle}
-          ref={canvasRef}
-          onMouseMove={e => canvasMouseMove(e)}
-          onMouseDown={e => canvasMouseDown(e)}
-          onMouseUp={e => canvasMouseUp(e)}>
-          {renderPlaceholders()}
-        </div>
       </div>
+      {activeTemplate && <TemplateComponent
+        update={updateTemplateState}
+        placeholders={activeTemplate.placeholders}
+        toolbarState={toolbarState} />}
     </main>
   )
 }
 
-export default Template
+export default Studio
