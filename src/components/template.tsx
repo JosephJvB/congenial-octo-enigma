@@ -7,22 +7,24 @@ import PlaceholderComponent from "./placeholder"
 
 const TemplateComponent = (props: TemplateComponentProps) => {
   const templateStyle = {
-    cursor: props.toolbarState == '' ? 'default' : 'crosshair',
+    cursor: props.dragState == '' ? 'default' : 'crosshair',
     margin: '0 auto',
   }
   const [dragStart, setDragStart] = useState<Coords>({ x: 0, y: 0 })
   const [mouseDown, setMouseDown] = useState(false)
-  const [pendingPlaceholder, setPendingPlaceholder] = useState<Placeholder | null>(null)
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+  const [pendingPlaceholder, setPendingPlaceholder] = useState<Placeholder | null>(null)
   const templateRef = useRef<HTMLDivElement>(null)
 
   const updatePlaceholders = (p: Placeholder[]) => {
-    props.update({
+    console.log('updatePlaceholders', p)
+    props.setActiveTemplate({
       placeholders: p
     })
   }
+
   const templateMouseDown = (e: React.MouseEvent) => {
-    if (props.toolbarState == '' || !templateRef.current) {
+    if (!templateRef.current) {
       return
     }
     setMouseDown(true)
@@ -33,38 +35,50 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     console.log('templateMouseDown', coords)
     setDragStart(coords)
   }
+  const templateMouseMove = (e: React.MouseEvent) => {
+    if (!templateRef.current || props.dragState == '' || !mouseDown) {
+      console.log('mouseDown', !templateRef.current, props.dragState == '', !mouseDown)
+      return
+    }
+    const coords: Coords = {
+      x: e.clientX - templateRef.current.offsetLeft,
+      y: e.clientY - templateRef.current.offsetTop,
+    }
+    // console.log('templateMouseMove', props.dragState, coords)
+    switch (props.dragState) {
+      case 'create:image':
+      case 'create:text':
+        updatePendingPlaceholder(coords)
+        break
+      case 'translate:image':
+      case 'translate:text':
+        updateExistingPlaceholder(coords)
+        break
+      case 'transform:image':
+      case 'transform:text':
+        // todo
+        console.log('templateMouseMove', props.dragState, 'not implemented')
+        break
+    }
+  }
   const templateMouseUp = (e: React.MouseEvent) => {
     if (!templateRef.current) {
       return
     }
     setMouseDown(false)
-    // setProps.ToolbarState('')
+    // setProps.DragState('')
+    console.log('templateMouseUp', pendingPlaceholder, props.placeholders)
     if (pendingPlaceholder) {
       updatePlaceholders([...props.placeholders, pendingPlaceholder])
       setPendingPlaceholder(null)
     }
   }
-  const templateMouseMove = (e: React.MouseEvent) => {
-    if (!mouseDown || !templateRef.current) {
-      return
-    }
-
-    const coords: Coords = {
-      x: e.clientX - templateRef.current.offsetLeft,
-      y: e.clientY - templateRef.current.offsetTop,
-    }
-    // console.log('templateMouseMove', coords)
-    if (props.toolbarState == '' && focusedIndex != null) {
-      const copy = [...props.placeholders]
-      copy[focusedIndex].left += coords.x - dragStart.x
-      copy[focusedIndex].top += coords.y - dragStart.y
-      updatePlaceholders(copy)
-      setDragStart(coords)
-      return
-    }
-
+  React.useEffect(() => {
+    console.log('props.placeholdersChanged', props.placeholders)
+  }, [props.placeholders])
+  const updatePendingPlaceholder = (coords: Coords) => {
     const pendingParams: Placeholder = {
-      type: props.toolbarState as PlaceholderTypes,
+      type: props.dragState.split(':')[1] as PlaceholderTypes,
       left: dragStart.x,
       top: dragStart.y,
       w: coords.x - dragStart.x,
@@ -84,38 +98,30 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     }
     setPendingPlaceholder(pendingParams)
   }
-
-  const placeholderMouseDown = (e: React.MouseEvent, i: number) => {
-    if (!templateRef.current) {
+  const updateExistingPlaceholder = (coords: Coords) => {
+    if (focusedIndex == null) {
       return
     }
-    e.stopPropagation()
-    setMouseDown(true)
-    const coords: Coords = {
-      x: e.clientX - templateRef.current.offsetLeft,
-      y: e.clientY - templateRef.current.offsetTop,
-    }
+    const copy = [...props.placeholders]
+    copy[focusedIndex].left += coords.x - dragStart.x
+    copy[focusedIndex].top += coords.y - dragStart.y
+    updatePlaceholders(copy)
     setDragStart(coords)
-    if (props.placeholders[i]) {
-      setFocusedIndex(i)
-    }
-    console.log('placeholderMouseDown')
-  }
-  const placeholderMouseUp = (e: React.MouseEvent, i: number) => {
-    console.log('placeholderMouseUp')
-    setMouseDown(false)
-    setFocusedIndex(null)
   }
 
   const renderOnePlaceholder = (p: Placeholder, i: number) => {
-    const props: PlaceholderComponentProps = {
+    const componentProps: PlaceholderComponentProps = {
       i,
       placeholder: p,
-      mouseDown: placeholderMouseDown,
-      mouseUp: placeholderMouseUp,
+      dragState: props.dragState,
+      setMouseDown,
+      updateDragState: props.updateDragState,
+      setDragStart,
+      setFocusedIndex,
     }
+    console.log('render with', i)
     return (
-      <PlaceholderComponent {...props} key={i} />
+      <PlaceholderComponent key={i} {...componentProps} />
     )
   }
 
@@ -124,10 +130,10 @@ const TemplateComponent = (props: TemplateComponentProps) => {
       <div className="templateCanvas"
         style={templateStyle}
         ref={templateRef}
-        onMouseMove={e => templateMouseMove(e)}
         onMouseDown={e => templateMouseDown(e)}
+        onMouseMove={e => templateMouseMove(e)}
         onMouseUp={e => templateMouseUp(e)}>
-        {props.placeholders.map((p, i) => renderOnePlaceholder(p, i + 5))}
+        {props.placeholders.map((p, i) => renderOnePlaceholder(p, i))}
         {pendingPlaceholder && renderOnePlaceholder(pendingPlaceholder, 999)}
       </div>
     </div>

@@ -13,10 +13,14 @@ export enum PlaceholderTypes {
   text = 'text',
   image = 'image'
 }
-export type dragTypes = 'createPlaceholder'
-  | 'translatePlaceholder'
-  | 'transformPlaceholder'
-export type transformDirections = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
+export type DragStates = ''
+  | 'create:image'
+  | 'translate:image'
+  | 'transform:image'
+  | 'create:text'
+  | 'translate:text'
+  | 'transform:text'
+export type TransformDirections = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 export interface Template {
   placeholders: Placeholder[]
 }
@@ -27,14 +31,24 @@ export interface Placeholder {
   h: number
   w: number
 }
+export interface PlaceholderNode {
+  direction: TransformDirections
+  top: string
+  left: string
+  zIndex: number
+}
 export interface TemplateComponentProps {
   placeholders: Placeholder[]
-  toolbarState: ToolbarStates
-  update: (t: Template) => void
+  dragState: DragStates
+  setActiveTemplate: (t: Template) => void
+  updateDragState: (t: DragStates) => void
 }
 export interface PlaceholderComponentProps {
   placeholder: Placeholder
   i: number
-  mouseDown: (e: React.MouseEvent, i: number) => void
-  mouseUp: (e: React.MouseEvent, i: number) => void
+  dragState: DragStates
+  updateDragState: (ds: DragStates) => void
+  setDragStart: (coords: Coords) => void
+  setMouseDown: (b: boolean) => void
+  setFocusedIndex: (i: number) => void
 }

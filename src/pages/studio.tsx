@@ -2,23 +2,20 @@ import * as React from "react"
 import { useState } from "react"
 import TemplateComponent from "../components/template"
 import "../styles/main.css"
-import { Template, ToolbarStates } from "../types"
+import { DragStates, Template } from "../types"
 
 
 const Studio = () => {
-  const [toolbarState, setToolbarState] = useState<ToolbarStates>('')
+  const [dragState, setDragState] = useState<DragStates>('')
   const [activeTemplate, setActiveTemplate] = useState<Template>({ placeholders: [] })
 
-  const updateToolbarState = (t: ToolbarStates) => {
-    console.log('updateToolbarState', t)
-    if (toolbarState == t) {
-      setToolbarState('')
+  const updateDragState = (t: DragStates) => {
+    console.log('updateDragState', t)
+    if (dragState == t) {
+      setDragState('')
     } else {
-      setToolbarState(t)
+      setDragState(t)
     }
-  }
-  const updateTemplateState = (t: Template) => {
-    setActiveTemplate(t)
   }
 
   return (
@@ -30,30 +27,29 @@ const Studio = () => {
         <div className="toolbar">
           <button
             onClick={() => {
-              // setPendingPlaceholder(null)
-              // setPlaceholders([])
-              // setFocusedIndex(null)
-              // setMouseDown(false)
+              setActiveTemplate({ placeholders: [] })
+              setDragState('')
             }}
             className="clearIcon">C</button>
           <button
-            style={toolbarState == '' ? {background: 'grey'} : {}}
-            onClick={() => updateToolbarState('')}
+            style={dragState == '' || dragState.startsWith('t') ? {background: 'grey'} : {}}
+            onClick={() => updateDragState('')}
             className="pointerIcon">P</button>
           <button
-            style={toolbarState == 'text' ? {background: 'grey'} : {}}
-            onClick={() => updateToolbarState('text')}
+            style={dragState == 'create:text' ? {background: 'grey'} : {}}
+            onClick={() => updateDragState('create:text')}
             className="addTextIcon">A</button>
           <button
-            style={toolbarState == 'image' ? {background: 'grey'} : {}}
-            onClick={() => updateToolbarState('image')}
+            style={dragState == 'create:image' ? {background: 'grey'} : {}}
+            onClick={() => updateDragState('create:image')}
             className="addImageIcon">Img</button>
         </div>
       </div>
       {activeTemplate && <TemplateComponent
-        update={updateTemplateState}
+        setActiveTemplate={setActiveTemplate}
+        updateDragState={updateDragState}
         placeholders={activeTemplate.placeholders}
-        toolbarState={toolbarState} />}
+        dragState={dragState} />}
     </main>
   )
 }
