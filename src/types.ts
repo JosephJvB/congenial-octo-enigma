@@ -9,7 +9,14 @@ export interface PositionCoords extends Coords {
   left: number
 }
 export type ToolbarStates = '' | 'text' | 'image';
-export type PlaceholderTypes = 'text' | 'image'
+export enum PlaceholderTypes {
+  text = 'text',
+  image = 'image'
+}
+export type dragTypes = 'createPlaceholder'
+  | 'translatePlaceholder'
+  | 'transformPlaceholder'
+export type transformDirections = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 export interface Template {
   placeholders: Placeholder[]
 }
