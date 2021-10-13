@@ -172,27 +172,27 @@ button {
   color: white;
   border: 1px solid black;
 }
-.transformNode.topLeft {
+.transformNode.nw {
   cursor: nw-resize;
 }
-.transformNode.topMid {
+.transformNode.n {
   cursor: n-resize;
 }
-.transformNode.topRight {
+.transformNode.ne {
   cursor: ne-resize;
 }
-.transformNode.midRight {
+.transformNode.e {
   cursor: e-resize;
 }
-.transformNode.botRight {
+.transformNode.se {
   cursor: se-resize;
 }
-.transformNode.botMid {
+.transformNode.s {
   cursor: s-resize;
 }
-.transformNode.botLeft {
+.transformNode.sw {
   cursor: sw-resize;
 }
-.transformNode.midLeft {
+.transformNode.w {
   cursor: w-resize;
 }

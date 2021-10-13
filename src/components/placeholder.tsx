@@ -31,14 +31,14 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
         <span>w: {w}</span>
       </div>
       <div className="transformWrapper">
-        <span style={{ zIndex: 11 + 1, top: '-4.5px', left: '-4.5px' }} className="transformNode topLeft"></span>
-        <span style={{ zIndex: 11 + 1, top: '-4.5px', left: (w / 2) - 4.5 + 'px' }} className="transformNode topMid"></span>
-        <span style={{ zIndex: 11 + 1, top: '-4.5px', left: w - 4.5 + 'px' }} className="transformNode topRight"></span>
-        <span style={{ zIndex: 11 + 1, top: (h / 2) - 4.5 + 'px', left: w - 4.5 + 'px' }} className="transformNode midRight"></span>
-        <span style={{ zIndex: 11 + 1, top: h - 4.5 + 'px', left: w - 4.5 + 'px' }} className="transformNode botRight"></span>
-        <span style={{ zIndex: 11 + 1, top: h - 4.5 + 'px', left: (w / 2) - 4.5 + 'px' }} className="transformNode botMid"></span>
-        <span style={{ zIndex: 11 + 1, top: h - 4.5 + 'px', left: '-4.5px' }} className="transformNode botLeft"></span>
-        <span style={{ zIndex: 11 + 1, top: (h / 2) - 4.5 + 'px', left: '-4.5px' }} className="transformNode midLeft"></span>
+        <span style={{ zIndex: 11 + 1, top: '-4.5px', left: '-4.5px' }} className="transformNode nw"></span>
+        <span style={{ zIndex: 11 + 1, top: '-4.5px', left: (w / 2) - 4.5 + 'px' }} className="transformNode n"></span>
+        <span style={{ zIndex: 11 + 1, top: '-4.5px', left: w - 4.5 + 'px' }} className="transformNode ne"></span>
+        <span style={{ zIndex: 11 + 1, top: (h / 2) - 4.5 + 'px', left: w - 4.5 + 'px' }} className="transformNode e"></span>
+        <span style={{ zIndex: 11 + 1, top: h - 4.5 + 'px', left: w - 4.5 + 'px' }} className="transformNode se"></span>
+        <span style={{ zIndex: 11 + 1, top: h - 4.5 + 'px', left: (w / 2) - 4.5 + 'px' }} className="transformNode s"></span>
+        <span style={{ zIndex: 11 + 1, top: h - 4.5 + 'px', left: '-4.5px' }} className="transformNode se"></span>
+        <span style={{ zIndex: 11 + 1, top: (h / 2) - 4.5 + 'px', left: '-4.5px' }} className="transformNode e"></span>
       </div>
     </div>
   )
