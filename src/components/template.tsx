@@ -1,6 +1,5 @@
 import * as React from "react"
 import { useRef, useState } from "react"
-import { render } from "react-dom"
 import "../styles/main.css"
 
 import { Coords, Placeholder, PlaceholderComponentProps, PlaceholderTypes, TemplateComponentProps } from "../types"
@@ -116,7 +115,7 @@ const TemplateComponent = (props: TemplateComponentProps) => {
       mouseUp: placeholderMouseUp,
     }
     return (
-      <PlaceholderComponent {...props} />
+      <PlaceholderComponent {...props} key={i} />
     )
   }
 

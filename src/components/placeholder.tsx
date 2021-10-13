@@ -19,10 +19,9 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
     left: left + 'px',
     zIndex: 10 + props.i,
   }
-  console.log('render', props.i)
   return (
     // need to add nodes for drag/transform
-    <div className={pClass} style={pStyle} key={props.i} data-key={props.i}
+    <div className={pClass} style={pStyle}
       onMouseDown={e => props.mouseDown(e, props.i)}
       onMouseUp={e => props.mouseUp(e, props.i)}>
       <div className="debugWrapper">
