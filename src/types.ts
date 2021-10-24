@@ -4,19 +4,15 @@ export interface Coords {
   x: number
   y: number
 }
-export interface PositionCoords extends Coords {
-  top: number
-  left: number
+export interface PlaceholderCoords extends Coords {
+  h: number
+  w: number
 }
 export type ToolbarStates = '' | 'text' | 'image'
 export type PlaceholderTypes = 'text' | 'image'
 export type TransformDirections = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
-export interface Placeholder {
+export interface Placeholder extends PlaceholderCoords {
   type: PlaceholderTypes
-  top: number
-  left: number
-  h: number
-  w: number
   pending: boolean
 }
 export interface PlaceholderNode {

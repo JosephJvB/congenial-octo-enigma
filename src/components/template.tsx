@@ -16,16 +16,19 @@ const TemplateComponent = (props: TemplateComponentProps) => {
   const templateRef = useRef<HTMLDivElement>(null)
 
   // log changes
-  React.useEffect(() => {
-    console.log('props.textPlaceholdersChanged', props.textPlaceholders)
-  }, [props.textPlaceholders])
-  React.useEffect(() => {
-    console.log('props.imagePlaceholdersChanged', props.imagePlaceholders)
-  }, [props.imagePlaceholders])
+  // React.useEffect(() => {
+  //   console.log('props.textPlaceholdersChanged', props.textPlaceholders)
+  // }, [props.textPlaceholders])
+  // React.useEffect(() => {
+  //   console.log('props.imagePlaceholdersChanged', props.imagePlaceholders)
+  // }, [props.imagePlaceholders])
+  // React.useEffect(() => {
+  //   console.log('pendingPlaceholder changed', pendingPlaceholder)
+  // }, [pendingPlaceholder])
 
   // mousedown, mousemove, mouseup
   const templateMouseDown = (e: React.MouseEvent) => {
-    if (!templateRef.current) {
+    if (!templateRef.current || props.toolbarState == '') {
       return
     }
     setMouseDown(true)
@@ -35,39 +38,35 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     }
     console.log('templateMouseDown', coords)
     setDragStart(coords)
+    setPendingPlaceholder({
+      pending: true,
+      type: props.toolbarState,
+      ...coords,
+      w: 0,
+      h: 0,
+    })
   }
   const templateMouseMove = (e: React.MouseEvent) => {
-    if (!templateRef.current || props.toolbarState == '' || !mouseDown) {
-      return
-    }
-    const pendingType = pendingPlaceholder?.type || props.toolbarState
-    if (pendingType != 'image' && pendingType != 'text') {
+    if (!templateRef.current || props.toolbarState == '' || !mouseDown || !pendingPlaceholder) {
       return
     }
     const coords: Coords = {
       x: e.clientX - templateRef.current.offsetLeft,
       y: e.clientY - templateRef.current.offsetTop,
     }
-    const pendingParams: Placeholder = {
-      pending: true,
-      type: pendingType,
-      left: dragStart.x,
-      top: dragStart.y,
-      w: coords.x - dragStart.x,
-      h: coords.y - dragStart.y,
+    const p = {...pendingPlaceholder}
+    p.w = coords.x - dragStart.x
+    p.h = coords.y - dragStart.y
+    if (p.w < 0) {
+      p.w = Math.abs(p.w)
+      p.x = dragStart.x - p.w
     }
-    if (pendingParams.w < 0) {
-      pendingParams.w = Math.abs(pendingParams.w)
-      pendingParams.left = dragStart.x - pendingParams.w
+    if (p.h < 0) {
+      p.h = Math.abs(p.h)
+      p.y = dragStart.y - p.h
     }
-    if (pendingParams.h < 0) {
-      pendingParams.h = Math.abs(pendingParams.h)
-      pendingParams.top = dragStart.y - pendingParams.h
-    }
-    if (pendingParams.w < 10 && pendingParams.h < 10) {
-      return
-    }
-    setPendingPlaceholder(pendingParams)
+    // console.log('updatependingcoords', pendingPlaceholder)
+    setPendingPlaceholder(p)
   }
   const templateMouseUp = (e: React.MouseEvent) => {
     console.log('templateMouseUp')
@@ -75,14 +74,20 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     if (!pendingPlaceholder) {
       return
     }
+    setPendingPlaceholder(null)
+    // dont add placeholders that are too small
+    if (pendingPlaceholder.w < 10 && pendingPlaceholder.h < 10) {
+      return
+    }
     pendingPlaceholder.pending = false
     if (props.toolbarState == 'image') {
-      props.setImagePlaceholders([...props.imagePlaceholders, pendingPlaceholder])
+      props.imagePlaceholders.push(pendingPlaceholder)
+      props.setImagePlaceholders(props.imagePlaceholders)
     }
     if (props.toolbarState == 'text') {
-      props.setTextPlaceholders([...props.textPlaceholders, pendingPlaceholder])
+      props.textPlaceholders.push(pendingPlaceholder)
+      props.setTextPlaceholders(props.textPlaceholders)
     }
-    setPendingPlaceholder(null)
   }
 
   const renderOnePlaceholder = (p: Placeholder, i: number) => {
