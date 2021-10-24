@@ -7,8 +7,18 @@ import { ToolbarStates, Placeholder } from "../types"
 
 const Studio = () => {
   const [toolbarState, setToolbarState] = useState<ToolbarStates>('')
-  const [imagePlaceholders, setImagePlaceholders] = useState<Placeholder[]>([])
-  const [textPlaceholders, setTextPlaceholders] = useState<Placeholder[]>([])
+  const [placeholders, setPlaceholders] = useState<Placeholder[]>([
+    // {
+    //   pending: false,
+    //   type: 'image',
+    //   coords: {
+    //     x: 10,
+    //     y: 10,
+    //     w: 100,
+    //     h: 100
+    //   }
+    // }
+  ])
 
   const updateToolbarState = (t: ToolbarStates) => {
     console.log('updateToolbarState', t)
@@ -28,8 +38,7 @@ const Studio = () => {
         <div className="toolbar">
           <button
             onClick={() => {
-              setImagePlaceholders([])
-              setTextPlaceholders([])
+              setPlaceholders([])
               setToolbarState('')
             }}
             className="clearIcon">C</button>
@@ -48,10 +57,8 @@ const Studio = () => {
         </div>
       </div>
       <TemplateComponent
-        imagePlaceholders={imagePlaceholders}
-        textPlaceholders={textPlaceholders}
-        setImagePlaceholders={setImagePlaceholders}
-        setTextPlaceholders={setTextPlaceholders}
+        placeholders={placeholders}
+        setPlaceholders={setPlaceholders}
         toolbarState={toolbarState} />
     </main>
   )

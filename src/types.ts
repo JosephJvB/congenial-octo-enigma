@@ -16,20 +16,17 @@ export interface Placeholder {
   pending: boolean
   coords: PlaceholderCoords
 }
-export interface PlaceholderNode {
+export interface PlaceholderNode extends Coords {
   direction: TransformDirections
-  top: string
-  left: string
 }
 export interface TemplateComponentProps {
-  imagePlaceholders: Placeholder[]
-  textPlaceholders: Placeholder[]
-  setImagePlaceholders: (p: Placeholder[]) => void
-  setTextPlaceholders: (p: Placeholder[]) => void
+  placeholders: Placeholder[]
+  setPlaceholders: (p: Placeholder[]) => void
   toolbarState: ToolbarStates
 }
 export interface PlaceholderComponentProps {
   placeholder: Placeholder
   i: number
-  updatePlaceholders: (p: Placeholder[]) => void
+  setMouseMoveFn: (fn: noop | null) => void
 }
+export type noop = (...args: any) => void

@@ -5,7 +5,6 @@ import {
   PlaceholderComponentProps,
   PlaceholderCoords,
   PlaceholderNode,
-  TransformDirections
 } from "../types"
 import "../styles/main.css"
 
@@ -16,7 +15,6 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
     coords,
   } = props.placeholder
   const placeholderRef = useRef<HTMLDivElement>(null)
-  const [mouseDown, setMouseDown] = useState<Boolean>(false)
   const [dragStart, setDragStart] = useState<Coords>({ x: 0, y: 0 })
   // using own coords is good for handling updates within the component
   // dont have to rerender all components on single component update
@@ -43,10 +41,10 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
       y: e.clientY - placeholderRef.current.offsetTop,
     }
     setDragStart(coords)
-    setMouseDown(true)
+    props.setMouseMoveFn(() => placeholderMouseMove)
   }
   const placeholderMouseMove = (e: React.MouseEvent) => {
-    if (!placeholderRef.current || pending || !mouseDown) {
+    if (!placeholderRef.current || pending) {
       return
     }
     e.stopPropagation()
@@ -61,17 +59,16 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
     })
   }
   const placeholderMouseUp = (e: React.MouseEvent) => {
-    if (pending || !mouseDown) {
+    if (pending) {
       return
     }
     console.log('placeholderMouseUp')
     e.stopPropagation()
-    setMouseDown(false)
+    props.setMouseMoveFn(null)
   }
 
   // node listeners
-  const nodeMouseDown = (e: React.MouseEvent) => {
-    console.log('nodeMouseDown')
+  const nodeMouseDown = (e: React.MouseEvent, n: PlaceholderNode) => {
     if (!placeholderRef.current) {
       return
     }
@@ -80,12 +77,12 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
       x: e.clientX - placeholderRef.current.offsetLeft,
       y: e.clientY - placeholderRef.current.offsetTop,
     }
+    console.log('nodeMouseDown', coords)
     setDragStart(coords)
-    setMouseDown(true)
   }
   // wip: node move transforms placeholders
-  const nodeMouseMove = (e: React.MouseEvent, d: TransformDirections) => {
-    if (!placeholderRef.current || pending || !mouseDown) {
+  const nodeMouseMove = (e: React.MouseEvent, n: PlaceholderNode) => {
+    if (!placeholderRef.current || pending) {
       return
     }
     e.stopPropagation()
@@ -93,8 +90,10 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
       x: e.clientX - placeholderRef.current.offsetLeft,
       y: e.clientY - placeholderRef.current.offsetTop,
     }
+    console.log('nodeMouseMove', coords)
     const nextCoords: PlaceholderCoords = {...ownCoords}
-    switch (d) {
+    let x = 0, y = 0, w= 0, h = 0
+    switch (n.direction) {
       case 'ne':
       case 'nw':
       case 'sw':
@@ -104,15 +103,17 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
         break
       case 's':
       case 'n':
-        // reset x
-        nextCoords.h += coords.y - dragStart.y
         break
       case 'e':
+        w = coords.x - dragStart.x
+        break
       case 'w':
-        // reset y
-        nextCoords.w += ((ownCoords.x + ownCoords.w) - dragStart.x)
         break
     }
+    nextCoords.x += x
+    nextCoords.y += y
+    nextCoords.w += w
+    nextCoords.h += h
     if (nextCoords.w < 0) {
       nextCoords.w = Math.abs(nextCoords.w)
       nextCoords.x = dragStart.x - nextCoords.w
@@ -127,7 +128,6 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
   const nodeMouseUp = (e: React.MouseEvent) => {
     console.log('nodeMouseUp')
     e.stopPropagation()
-    setMouseDown(false)
   }
 
   const { w, h, x, y, } = ownCoords
@@ -140,20 +140,19 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
     zIndex: 10 + props.i,
   }
   const nodes: PlaceholderNode[] = [
-    { top: '-4.5px', left: '-4.5px', direction: 'nw' },
-    { top: '-4.5px', left: (w / 2) - 4.5 + 'px', direction: 'n' },
-    { top: '-4.5px', left: w - 4.5 + 'px', direction: 'ne' },
-    { top: (h / 2) - 4.5 + 'px', left: w - 4.5 + 'px', direction: 'e' },
-    { top: h - 4.5 + 'px', left: w - 4.5 + 'px', direction: 'se' },
-    { top: h - 4.5 + 'px', left: (w / 2) - 4.5 + 'px', direction: 's' },
-    { top: h - 4.5 + 'px', left: '-4.5px', direction: 'sw' },
-    { top: (h / 2) - 4.5 + 'px', left: '-4.5px', direction: 'w' },
+    { y: -4.5, x: -4.5, direction: 'nw' },
+    { y: -4.5, x: (w / 2) - 4.5, direction: 'n' },
+    { y: -4.5, x: w - 4.5, direction: 'ne' },
+    { y: (h / 2) - 4.5, x: w - 4.5, direction: 'e' },
+    { y: h - 4.5, x: w - 4.5, direction: 'se' },
+    { y: h - 4.5, x: (w / 2) - 4.5, direction: 's' },
+    { y: h - 4.5, x: -4.5, direction: 'sw' },
+    { y: (h / 2) - 4.5, x: -4.5, direction: 'w' },
   ]
   return (
     // need to add nodes for drag/transform
     <div className={pClass} style={pStyle} ref={placeholderRef}
       onMouseDown={e => placeholderMouseDown(e)}
-      onMouseMove={e => placeholderMouseMove(e)}
       onMouseUp={e => placeholderMouseUp(e)}>
       <div className="debugWrapper">
         <span>x: {x}</span>
@@ -163,12 +162,12 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
       </div>
       <div className="transformWrapper">
         {!pending && nodes.map(n => {
-          const style = { zIndex: 11 + props.i, top: n.top, left: n.left }
+          const style = { zIndex: 11 + props.i, top: n.y + 'px', left: n.x + 'px' }
           const className = `transformNode ${n.direction}`
           return <span key={className} style={style} className={className}
-            onMouseDown={e => nodeMouseDown(e)}
-            onMouseMove={e => nodeMouseMove(e, n.direction)}
-            onMouseUp={e => nodeMouseUp(e)}></span>
+              onMouseUp={e => nodeMouseUp(e)}
+              onMouseDown={e => nodeMouseDown(e, n)}>
+            </span>
         })}
       </div>
     </div>

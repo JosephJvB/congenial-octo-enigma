@@ -2,7 +2,7 @@ import * as React from "react"
 import { useRef, useState } from "react"
 import "../styles/main.css"
 
-import { Coords, Placeholder, PlaceholderComponentProps, TemplateComponentProps } from "../types"
+import { Coords, noop, Placeholder, PlaceholderComponentProps, TemplateComponentProps } from "../types"
 import PlaceholderComponent from "./placeholder"
 
 const TemplateComponent = (props: TemplateComponentProps) => {
@@ -11,8 +11,9 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     margin: '0 auto',
   }
   const [dragStart, setDragStart] = useState<Coords>({ x: 0, y: 0 })
-  const [mouseDown, setMouseDown] = useState(false)
   const [pendingPlaceholder, setPendingPlaceholder] = useState<Placeholder | null>(null)
+  // https://stackoverflow.com/questions/55621212/is-it-possible-to-react-usestate-in-react
+  const [mouseMoveFn, setMouseMoveFn] = useState<noop | null>(null)
   const templateRef = useRef<HTMLDivElement>(null)
 
   // log changes
@@ -25,20 +26,22 @@ const TemplateComponent = (props: TemplateComponentProps) => {
   // React.useEffect(() => {
   //   console.log('pendingPlaceholder changed', pendingPlaceholder)
   // }, [pendingPlaceholder])
+  React.useEffect(() => {
+    console.log('mouseMoveFn changed', mouseMoveFn?.name)
+  }, [mouseMoveFn])
 
   // mousedown, mousemove, mouseup
   const templateMouseDown = (e: React.MouseEvent) => {
     if (!templateRef.current || props.toolbarState == '') {
       return
     }
-    setMouseDown(true)
+    console.log('setMouseMoveFn', templateMouseMove.name)
     const coords: Coords = {
       x: e.clientX - templateRef.current.offsetLeft,
       y: e.clientY - templateRef.current.offsetTop,
     }
     console.log('templateMouseDown', coords)
-    setDragStart(coords)
-    setPendingPlaceholder({
+    const nextPlaceholder = {
       pending: true,
       type: props.toolbarState,
       coords: {
@@ -46,17 +49,22 @@ const TemplateComponent = (props: TemplateComponentProps) => {
         w: 0,
         h: 0,
       }
-    })
+    }
+    setPendingPlaceholder(nextPlaceholder)
+    setDragStart(coords)
+    const p = pendingPlaceholder || nextPlaceholder
+    setMouseMoveFn(() => (e: React.MouseEvent) => templateMouseMove(e, p))
   }
-  const templateMouseMove = (e: React.MouseEvent) => {
-    if (!templateRef.current || props.toolbarState == '' || !mouseDown || !pendingPlaceholder) {
+  // issue with pendingPlaceholder undefined, setState function clojure?
+  const templateMouseMove = (e: React.MouseEvent, p: Placeholder) => {
+    if (!templateRef.current || !p) {
       return
     }
     const coords: Coords = {
       x: e.clientX - templateRef.current.offsetLeft,
       y: e.clientY - templateRef.current.offsetTop,
     }
-    const pCoords = {...pendingPlaceholder.coords}
+    const pCoords = {...p.coords}
     pCoords.w = coords.x - dragStart.x
     pCoords.h = coords.y - dragStart.y
     if (pCoords.w < 0) {
@@ -69,41 +77,34 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     }
     // console.log('updatependingcoords', pendingPlaceholder)
     setPendingPlaceholder({
-      ...pendingPlaceholder,
+      ...p,
       coords: pCoords
     })
   }
   const templateMouseUp = (e: React.MouseEvent) => {
     console.log('templateMouseUp')
-    setMouseDown(false)
+    setMouseMoveFn(null)
+    setPendingPlaceholder(null)
     if (!pendingPlaceholder) {
       return
     }
-    setPendingPlaceholder(null)
     // dont add placeholders that are too small
     if (pendingPlaceholder.coords.w < 10 && pendingPlaceholder.coords.h < 10) {
       return
     }
+    if (props.toolbarState == '') {
+      return
+    }
     pendingPlaceholder.pending = false
-    if (props.toolbarState == 'image') {
-      props.imagePlaceholders.push(pendingPlaceholder)
-      props.setImagePlaceholders(props.imagePlaceholders)
-    }
-    if (props.toolbarState == 'text') {
-      props.textPlaceholders.push(pendingPlaceholder)
-      props.setTextPlaceholders(props.textPlaceholders)
-    }
+    props.placeholders.push(pendingPlaceholder)
+    props.setPlaceholders(props.placeholders)
   }
 
   const renderOnePlaceholder = (p: Placeholder, i: number) => {
-    const updateFn: (p: Placeholder[]) => void = {
-      text: props.setTextPlaceholders,
-      image: props.setImagePlaceholders,
-    }[p.type]
     const componentProps: PlaceholderComponentProps = {
       i,
       placeholder: p,
-      updatePlaceholders: updateFn
+      setMouseMoveFn: setMouseMoveFn,
     }
     // if I create different components for Image/Text
     // const component = {
@@ -120,11 +121,10 @@ const TemplateComponent = (props: TemplateComponentProps) => {
         style={templateStyle}
         ref={templateRef}
         onMouseDown={e => templateMouseDown(e)}
-        onMouseMove={e => templateMouseMove(e)}
+        onMouseMove={e => mouseMoveFn && mouseMoveFn(e)}
         onMouseUp={e => templateMouseUp(e)}>
-        {props.imagePlaceholders.map((p, i) => renderOnePlaceholder(p, i))}
-        {props.textPlaceholders.map((p, i) => renderOnePlaceholder(p, i))}
-        {pendingPlaceholder && renderOnePlaceholder(pendingPlaceholder, 999)}
+        {props.placeholders.map((p, i) => renderOnePlaceholder(p, i))}
+        {pendingPlaceholder && renderOnePlaceholder(pendingPlaceholder, props.placeholders.length)}
       </div>
     </div>
   )
