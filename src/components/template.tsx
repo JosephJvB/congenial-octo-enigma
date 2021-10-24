@@ -41,9 +41,11 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     setPendingPlaceholder({
       pending: true,
       type: props.toolbarState,
-      ...coords,
-      w: 0,
-      h: 0,
+      coords: {
+        ...coords,
+        w: 0,
+        h: 0,
+      }
     })
   }
   const templateMouseMove = (e: React.MouseEvent) => {
@@ -54,19 +56,22 @@ const TemplateComponent = (props: TemplateComponentProps) => {
       x: e.clientX - templateRef.current.offsetLeft,
       y: e.clientY - templateRef.current.offsetTop,
     }
-    const p = {...pendingPlaceholder}
-    p.w = coords.x - dragStart.x
-    p.h = coords.y - dragStart.y
-    if (p.w < 0) {
-      p.w = Math.abs(p.w)
-      p.x = dragStart.x - p.w
+    const pCoords = {...pendingPlaceholder.coords}
+    pCoords.w = coords.x - dragStart.x
+    pCoords.h = coords.y - dragStart.y
+    if (pCoords.w < 0) {
+      pCoords.w = Math.abs(pCoords.w)
+      pCoords.x = dragStart.x - pCoords.w
     }
-    if (p.h < 0) {
-      p.h = Math.abs(p.h)
-      p.y = dragStart.y - p.h
+    if (pCoords.h < 0) {
+      pCoords.h = Math.abs(pCoords.h)
+      pCoords.y = dragStart.y - pCoords.h
     }
     // console.log('updatependingcoords', pendingPlaceholder)
-    setPendingPlaceholder(p)
+    setPendingPlaceholder({
+      ...pendingPlaceholder,
+      coords: pCoords
+    })
   }
   const templateMouseUp = (e: React.MouseEvent) => {
     console.log('templateMouseUp')
@@ -76,7 +81,7 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     }
     setPendingPlaceholder(null)
     // dont add placeholders that are too small
-    if (pendingPlaceholder.w < 10 && pendingPlaceholder.h < 10) {
+    if (pendingPlaceholder.coords.w < 10 && pendingPlaceholder.coords.h < 10) {
       return
     }
     pendingPlaceholder.pending = false

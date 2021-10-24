@@ -11,9 +11,10 @@ export interface PlaceholderCoords extends Coords {
 export type ToolbarStates = '' | 'text' | 'image'
 export type PlaceholderTypes = 'text' | 'image'
 export type TransformDirections = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
-export interface Placeholder extends PlaceholderCoords {
+export interface Placeholder {
   type: PlaceholderTypes
   pending: boolean
+  coords: PlaceholderCoords
 }
 export interface PlaceholderNode {
   direction: TransformDirections
