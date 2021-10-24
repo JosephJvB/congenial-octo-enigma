@@ -13,6 +13,8 @@ const TemplateComponent = (props: TemplateComponentProps) => {
   const [dragStart, setDragStart] = useState<Coords>({ x: 0, y: 0 })
   const [pendingPlaceholder, setPendingPlaceholder] = useState<Placeholder | null>(null)
   // https://stackoverflow.com/questions/55621212/is-it-possible-to-react-usestate-in-react
+  // try to handle all mouseMoves from here because listening for MouseMove inside a v small html element is hard
+  // eg: placeholder transform node
   const [mouseMoveFn, setMouseMoveFn] = useState<noop | null>(null)
   const templateRef = useRef<HTMLDivElement>(null)
 
