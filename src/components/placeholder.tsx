@@ -15,7 +15,6 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
     coords,
   } = props.placeholder
   const placeholderRef = useRef<HTMLDivElement>(null)
-  const [dragStart, setDragStart] = useState<Coords>({ x: 0, y: 0 })
   // using own coords is good for handling updates within the component
   // dont have to rerender all components on single component update
   // harder: how to get coords from within all components to SAVE
@@ -36,28 +35,28 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
     if (!placeholderRef.current) {
       return
     }
-    const coords: Coords = {
+    const mDownCoords: Coords = {
       x: e.clientX - placeholderRef.current.offsetLeft,
       y: e.clientY - placeholderRef.current.offsetTop,
     }
-    setDragStart(coords)
-    const c = dragStart || coords
-    props.setMouseMoveFn(() => (e: React.MouseEvent) => placeholderMouseMove(e, c))
+    props.setMouseMoveFn(() => (e: React.MouseEvent) => placeholderMouseMove(e, mDownCoords))
   }
-  const placeholderMouseMove = (e: React.MouseEvent, c: Coords) => {
+  const placeholderMouseMove = (e: React.MouseEvent, mDownCoords: Coords) => {
     if (!placeholderRef.current || pending) {
       return
     }
     e.stopPropagation()
-    const coords: Coords = {
+    const mMoveCoords: Coords = {
       x: e.clientX - placeholderRef.current.offsetLeft,
       y: e.clientY - placeholderRef.current.offsetTop,
     }
-    setOwnCoords({
-      ...ownCoords,
-      x: ownCoords.x - c.x + coords.x,
-      y: ownCoords.y - c.y + coords.y,
-    })
+    const diff: Coords = {
+      x: mMoveCoords.x - mDownCoords.x,
+      y: mMoveCoords.y - mDownCoords.y,
+    }
+    ownCoords.x += diff.x
+    ownCoords.y += diff.y
+    setOwnCoords({ ...ownCoords })
   }
   const placeholderMouseUp = (e: React.MouseEvent) => {
     if (pending) {
@@ -79,9 +78,11 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
       y: e.clientY - placeholderRef.current.offsetTop,
     }
     console.log('nodeMouseDown', coords)
-    setDragStart(coords)
   }
   // wip: node move transforms placeholders
+  // paused on this.
+  // refactor to handle all mouseMoves from template onMouseMove listener
+  // means if cursor moves outside of node / placeholder element we will still receive the events
   const nodeMouseMove = (e: React.MouseEvent, n: PlaceholderNode) => {
     e.stopPropagation()
     if (!placeholderRef.current || pending) {
@@ -99,14 +100,11 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
       case 'nw':
       case 'sw':
       case 'se':
-        nextCoords.w += coords.x - dragStart.x
-        nextCoords.h += coords.y - dragStart.y
         break
       case 's':
       case 'n':
         break
       case 'e':
-        w = coords.x - dragStart.x
         break
       case 'w':
         break
@@ -117,13 +115,12 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
     nextCoords.h += h
     if (nextCoords.w < 0) {
       nextCoords.w = Math.abs(nextCoords.w)
-      nextCoords.x = dragStart.x - nextCoords.w
+      // nextCoords.x = dragStart.x - nextCoords.w
     }
     if (nextCoords.h < 0) {
       nextCoords.h = Math.abs(nextCoords.h)
-      nextCoords.y = dragStart.y - nextCoords.h
+      // nextCoords.y = dragStart.y - nextCoords.h
     }
-    setDragStart(coords)
     setOwnCoords(nextCoords)
   }
   const nodeMouseUp = (e: React.MouseEvent) => {
@@ -166,8 +163,8 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
           const style = { zIndex: 11 + props.i, top: n.y + 'px', left: n.x + 'px' }
           const className = `transformNode ${n.direction}`
           return <span key={className} style={style} className={className}
-              onMouseUp={e => nodeMouseUp(e)}
-              onMouseDown={e => nodeMouseDown(e, n)}>
+              onMouseDown={e => nodeMouseDown(e, n)}
+              onMouseUp={e => nodeMouseUp(e)}>
             </span>
         })}
       </div>

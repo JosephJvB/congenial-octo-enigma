@@ -10,7 +10,6 @@ const TemplateComponent = (props: TemplateComponentProps) => {
     cursor: props.toolbarState == '' ? 'default' : 'crosshair',
     margin: '0 auto',
   }
-  const [dragStart, setDragStart] = useState<Coords>({ x: 0, y: 0 })
   const [pendingPlaceholder, setPendingPlaceholder] = useState<Placeholder | null>(null)
   // https://stackoverflow.com/questions/55621212/is-it-possible-to-react-usestate-in-react
   // try to handle all mouseMoves from here because listening for MouseMove inside a v small html element is hard
@@ -53,34 +52,31 @@ const TemplateComponent = (props: TemplateComponentProps) => {
       }
     }
     setPendingPlaceholder(nextPlaceholder)
-    setDragStart(coords)
-    const p = pendingPlaceholder || nextPlaceholder
-    setMouseMoveFn(() => (e: React.MouseEvent) => templateMouseMove(e, p))
+    setMouseMoveFn(() => (e: React.MouseEvent) => templateMouseMove(e, nextPlaceholder))
   }
   // issue with pendingPlaceholder undefined, setState function clojure?
-  const templateMouseMove = (e: React.MouseEvent, p: Placeholder) => {
-    if (!templateRef.current || !p) {
+  const templateMouseMove = (e: React.MouseEvent, mDownPlaceholder: Placeholder) => {
+    if (!templateRef.current || !mDownPlaceholder) {
       return
     }
-    const coords: Coords = {
+    const mMoveCoords: Coords = {
       x: e.clientX - templateRef.current.offsetLeft,
       y: e.clientY - templateRef.current.offsetTop,
     }
-    const pCoords = {...p.coords}
-    pCoords.w = coords.x - dragStart.x
-    pCoords.h = coords.y - dragStart.y
-    if (pCoords.w < 0) {
-      pCoords.w = Math.abs(pCoords.w)
-      pCoords.x = dragStart.x - pCoords.w
+    const nextCoords = {...mDownPlaceholder.coords}
+    nextCoords.w = mMoveCoords.x - nextCoords.x
+    nextCoords.h = mMoveCoords.y - nextCoords.y
+    if (nextCoords.w < 0) {
+      nextCoords.w = Math.abs(nextCoords.w)
+      nextCoords.x = nextCoords.x - nextCoords.w
     }
-    if (pCoords.h < 0) {
-      pCoords.h = Math.abs(pCoords.h)
-      pCoords.y = dragStart.y - pCoords.h
+    if (nextCoords.h < 0) {
+      nextCoords.h = Math.abs(nextCoords.h)
+      nextCoords.y = nextCoords.y - nextCoords.h
     }
-    // console.log('updatependingcoords', pendingPlaceholder)
     setPendingPlaceholder({
-      ...p,
-      coords: pCoords
+      ...mDownPlaceholder,
+      coords: nextCoords
     })
   }
   const templateMouseUp = (e: React.MouseEvent) => {
