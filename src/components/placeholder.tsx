@@ -27,14 +27,11 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
 
   // placeholder listeners
   const placeholderMouseDown = (e: React.MouseEvent) => {
-    if (pending) {
+    if (!placeholderRef.current || pending) {
       return
     }
     e.stopPropagation()
     console.log('placeholderMouseDown')
-    if (!placeholderRef.current) {
-      return
-    }
     const mDownCoords: Coords = {
       x: e.clientX - placeholderRef.current.offsetLeft,
       y: e.clientY - placeholderRef.current.offsetTop,
@@ -54,9 +51,16 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
       x: mMoveCoords.x - mDownCoords.x,
       y: mMoveCoords.y - mDownCoords.y,
     }
+    // only works properly mutating ownCoords, not updating new values
+    // no idea why, can't be bothered with it right now
     ownCoords.x += diff.x
     ownCoords.y += diff.y
-    setOwnCoords({ ...ownCoords })
+    setOwnCoords({
+      ...ownCoords,
+      // this does not work
+      // x: ownCoords.x + diff.x,
+      // y: ownCoords.y + diff.y,
+    })
   }
   const placeholderMouseUp = (e: React.MouseEvent) => {
     if (pending) {
@@ -69,32 +73,28 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
 
   // node listeners
   const nodeMouseDown = (e: React.MouseEvent, n: PlaceholderNode) => {
-    e.stopPropagation()
-    if (!placeholderRef.current) {
+    if (!placeholderRef.current || pending) {
       return
     }
-    const coords: Coords = {
+    e.stopPropagation()
+    const mDownCoords: Coords = {
       x: e.clientX - placeholderRef.current.offsetLeft,
       y: e.clientY - placeholderRef.current.offsetTop,
     }
     console.log('nodeMouseDown', coords)
+    props.setMouseMoveFn(() => (e: React.MouseEvent) => nodeMouseMove(e, n, mDownCoords))
   }
   // wip: node move transforms placeholders
-  // paused on this.
-  // refactor to handle all mouseMoves from template onMouseMove listener
-  // means if cursor moves outside of node / placeholder element we will still receive the events
-  const nodeMouseMove = (e: React.MouseEvent, n: PlaceholderNode) => {
+  const nodeMouseMove = (e: React.MouseEvent, n: PlaceholderNode, mDownCoords: Coords) => {
     e.stopPropagation()
     if (!placeholderRef.current || pending) {
       return
     }
-    const coords: Coords = {
+    const mMoveCoords: Coords = {
       x: e.clientX - placeholderRef.current.offsetLeft,
       y: e.clientY - placeholderRef.current.offsetTop,
     }
-    console.log('nodeMouseMove', coords)
-    const nextCoords: PlaceholderCoords = {...ownCoords}
-    let x = 0, y = 0, w= 0, h = 0
+    let nextCoords: PlaceholderCoords = {...ownCoords}
     switch (n.direction) {
       case 'ne':
       case 'nw':
@@ -102,30 +102,35 @@ const PlaceholderComponent = (props: PlaceholderComponentProps) => {
       case 'se':
         break
       case 's':
+        nextCoords.h += mMoveCoords.y - mDownCoords.y
+        break
       case 'n':
         break
-      case 'e':
+      case 'e': // works - inverting breaks
+        nextCoords.w += mMoveCoords.x - mDownCoords.x
         break
-      case 'w':
+      case 'w': // works - inverting breaks
+        nextCoords = ownCoords // no idea why but this works. See placeholderMouseMove
+        const wDiff = mMoveCoords.x - mDownCoords.x
+        nextCoords.x += wDiff
+        nextCoords.w -= wDiff
         break
     }
-    nextCoords.x += x
-    nextCoords.y += y
-    nextCoords.w += w
-    nextCoords.h += h
-    if (nextCoords.w < 0) {
-      nextCoords.w = Math.abs(nextCoords.w)
-      // nextCoords.x = dragStart.x - nextCoords.w
-    }
+    // if (nextCoords.w < 0) {
+    //   console.log('width zero', nextCoords.w)
+    //   nextCoords.w = Math.abs(nextCoords.w)
+    //   nextCoords.x = ownCoords.x - nextCoords.w
+    // }
     if (nextCoords.h < 0) {
       nextCoords.h = Math.abs(nextCoords.h)
-      // nextCoords.y = dragStart.y - nextCoords.h
+      nextCoords.y = ownCoords.y - nextCoords.h
     }
-    setOwnCoords(nextCoords)
+    setOwnCoords({...nextCoords})
   }
   const nodeMouseUp = (e: React.MouseEvent) => {
     e.stopPropagation()
     console.log('nodeMouseUp')
+    props.setMouseMoveFn(null)
   }
 
   const { w, h, x, y, } = ownCoords
